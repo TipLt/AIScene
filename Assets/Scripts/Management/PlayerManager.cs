@@ -1,5 +1,6 @@
 using UnityEngine;
 using AIScene.Pooling;
+using AIScene.Events;
 using System.Collections.Generic;
 
 namespace AIScene.Management
@@ -31,8 +32,8 @@ namespace AIScene.Management
 
         private void Start()
         {
-            // Notify EnemyAI about the player parent
-            AIScene.AI.EnemyAI.SetPlayerParent(playerParent);
+            // Notify listeners about the player parent via event system
+            GameEvents.NotifyPlayerParentSet(playerParent);
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using AIScene.Events;
 
 namespace AIScene.AI
 {
@@ -27,11 +28,51 @@ namespace AIScene.AI
 
         // Reference to the player parent object for detection
         private static Transform playerParent;
+        private static bool playerParentInitialized;
+        private static bool eventSubscribed;
 
         private void Awake()
         {
             navAgent = GetComponent<NavMeshAgent>();
             SetupNavAgent();
+            SubscribeToEvents();
+            TryCachePlayerParent();
+        }
+
+        /// <summary>
+        /// Subscribe to game events for decoupled communication.
+        /// </summary>
+        private static void SubscribeToEvents()
+        {
+            if (!eventSubscribed)
+            {
+                GameEvents.OnPlayerParentSet += HandlePlayerParentSet;
+                eventSubscribed = true;
+            }
+        }
+
+        /// <summary>
+        /// Handle the player parent set event.
+        /// </summary>
+        private static void HandlePlayerParentSet(Transform parent)
+        {
+            SetPlayerParent(parent);
+        }
+
+        /// <summary>
+        /// Attempt to cache the player parent reference once during initialization.
+        /// </summary>
+        private void TryCachePlayerParent()
+        {
+            if (!playerParentInitialized)
+            {
+                GameObject playerObj = GameObject.Find("Player");
+                if (playerObj != null)
+                {
+                    playerParent = playerObj.transform;
+                    playerParentInitialized = true;
+                }
+            }
         }
 
         private void OnEnable()
@@ -111,14 +152,10 @@ namespace AIScene.AI
         /// </summary>
         private void FindNewTarget()
         {
-            // Find player parent if not cached
-            if (playerParent == null)
+            // Try to cache player parent if not already done
+            if (!playerParentInitialized)
             {
-                GameObject playerObj = GameObject.Find("Player");
-                if (playerObj != null)
-                {
-                    playerParent = playerObj.transform;
-                }
+                TryCachePlayerParent();
             }
 
             if (playerParent == null)
@@ -201,6 +238,7 @@ namespace AIScene.AI
         public static void SetPlayerParent(Transform parent)
         {
             playerParent = parent;
+            playerParentInitialized = parent != null;
         }
 
         /// <summary>

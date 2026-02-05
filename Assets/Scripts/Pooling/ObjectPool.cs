@@ -15,6 +15,7 @@ namespace AIScene.Pooling
         [SerializeField] private bool expandable = true;
 
         private Queue<GameObject> availableObjects = new Queue<GameObject>();
+        private HashSet<GameObject> availableObjectsLookup = new HashSet<GameObject>();
         private List<GameObject> allObjects = new List<GameObject>();
         private Transform poolContainer;
 
@@ -45,6 +46,7 @@ namespace AIScene.Pooling
             GameObject obj = Instantiate(prefab, poolContainer);
             obj.SetActive(false);
             availableObjects.Enqueue(obj);
+            availableObjectsLookup.Add(obj);
             allObjects.Add(obj);
             return obj;
         }
@@ -71,6 +73,7 @@ namespace AIScene.Pooling
             }
 
             GameObject obj = availableObjects.Dequeue();
+            availableObjectsLookup.Remove(obj);
             obj.transform.position = position;
             obj.transform.rotation = rotation;
             obj.SetActive(true);
@@ -88,9 +91,11 @@ namespace AIScene.Pooling
             obj.SetActive(false);
             obj.transform.SetParent(poolContainer);
             
-            if (!availableObjects.Contains(obj))
+            // Use HashSet for O(1) lookup instead of Queue O(n)
+            if (!availableObjectsLookup.Contains(obj))
             {
                 availableObjects.Enqueue(obj);
+                availableObjectsLookup.Add(obj);
             }
         }
 

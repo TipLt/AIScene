@@ -17,6 +17,8 @@ Assets/Scripts/
 │   └── EnemyAI.cs           # NavMesh-based enemy detection and chasing
 ├── Combat/
 │   └── CollisionHandler.cs  # Player-enemy collision elimination
+├── Events/
+│   └── GameEvents.cs        # Decoupled event communication system
 ├── Management/
 │   ├── GameManager.cs       # Central game management
 │   ├── PlayerManager.cs     # Player unit spawning and management
